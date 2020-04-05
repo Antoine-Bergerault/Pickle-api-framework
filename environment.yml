@@ -1,0 +1,6 @@
+site : Pickle-api.local
+
+host : localhost
+username : root
+password : ''
+database : pickle-api
