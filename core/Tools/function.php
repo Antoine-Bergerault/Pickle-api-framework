@@ -46,13 +46,6 @@ function route($name){
     return url(Router::getRoute($name)->path);
 }
 
-function alert($str){//use the javascript alert function
-
-    echo "<script>alert($str)</script>";
-    return false;
-
-}
-
 function speaking_format($date){
     $datetime = date_diff(new DateTime(date("Y-m-d H:i:s")), new DateTime($date));
     $date = new stdClass();

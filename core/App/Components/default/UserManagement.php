@@ -8,9 +8,6 @@ require_once ROOT.'/core/Tools/config.php';
 trait UserManagement{
 
     static function connect($usr, $remind = false){//connect the app to the user passed in parameter as $usr
-        if(is_object($usr)){
-            $usr->devices = self::getUserDevices($usr->id ?? null);
-        }
         self::$user = $usr;
         self::session();
         $_SESSION['user'] = self::$user;//store the user in session
@@ -18,47 +15,6 @@ trait UserManagement{
             self::saveusercookie($usr);
         }
         self::save('ip', $_SERVER['REMOTE_ADDR']);
-        if(isset($usr->devices)){
-            self::updateDevicesAddUser($usr->devices);
-        }
-    }
-
-    static function getUserDevices(?int $id){
-        if(!is_int($id) || empty($id)){
-            return [];
-        }
-        $firebasemodule = App::module('firebase');
-        $results = $firebasemodule->getDatabase()->getReference('token')->orderByChild('userAccount')->equalTo("$id")->getValue();
-        if(App::isset_session('devices')){
-            $devices = App::get('devices');
-            if(!is_array($devices)) $devices = [$devices];
-            $results = array_merge($results, $devices);
-        }
-        return $results;
-    }
-
-    static function addDevice($device){
-        if(App::is_connected()){
-            $user = App::get('user');
-            if(!isset($user->devices)) $user->devices = [];
-            $user->devices[] = $device;
-            App::save('user', $user);
-        }
-    }
-
-    static function updateDevicesAddUser(array $devices){
-        if(App::is_connected()){
-            $firebaseModule = App::module('firebase');
-            $database = $firebaseModule->getDatabase();
-            foreach($devices as $device){
-                if(!isset($device['userAccount']) || $device['userAccount'] == false){
-                    if(isset($device['token'])){
-                        $device['userAccount'] = App::getid();
-                        $database->getReference('token/'.$device['token'])->set($device);
-                    }
-                }
-            }
-        }
     }
 
     static function logout(){//logout the current user if we are connected
@@ -172,17 +128,6 @@ trait UserManagement{
 
         return false;
 
-    }
-
-    static function getteamid(){
-        if (self::is_connected()) {
-
-            $usr = self::$user;
-            return $usr->team_id ?? false;
-
-        }
-
-        return false;
     }
 
     static function getteammoderator(){
