@@ -5,8 +5,7 @@ define('ROOT', dirname(__DIR__));
 
 use Yalesov\Yaml\Yaml;
 use \Pickle\Engine\App;
-use \Pickle\Engine\Router;
-use Pickle\Engine\ApiEngine;
+use Pickle\Engine\Router;
 
 /**
  * Security
@@ -67,8 +66,7 @@ if(ENV == 'PROD'){
     register_shutdown_function('fatal_handler');
 }
 
-$ApiEngine = new ApiEngine();
-$GLOBALS['ApiEngine'] = $ApiEngine;
+header('Content-Type: application/json');
 
 App::activeMiddlewares([]);
 
