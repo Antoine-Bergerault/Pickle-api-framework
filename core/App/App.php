@@ -13,7 +13,6 @@ class App extends Session{
 
     static $user = false;//variable to store the user
     static $url = null;//variable to store the url
-    static $extras = [];//extras
     static $middlewares = [];
     static $modules = [];
     static $components = true;
@@ -43,48 +42,11 @@ class App extends Session{
             self::fromcookie();
         }
         self::seturl();//initialize the $url
-
-        self::load_extra();
         
         $GLOBALS['scripts'] = [];
         $GLOBALS['styles'] = [];
 
-        if(!self::isset_session('colors')){
-            /*self::setColors([
-                'mathematiques' => '#ff7f50',
-                'physique' => '#ff4757',
-                'chimie' => '#1e90ff',
-                'svt' => '#2ed573',
-                'informatique' => '#a4b0be',
-                'histoire' => '#FD7272',
-                'geographie' => '#EAB543'
-            ]);*/
-            self::save('colors', self::getColors());
-        }
-
         self::checkSession();
-    }
-
-    static function load_extra(){
-        if (self::$components == true) {
-            require_once(__DIR__.'/Extras.php');
-            $Extras = new Extras();
-
-            if(self::isset_session('flash')){
-                echo $Extras->flashes(self::get('flash'));
-                self::destroy('flash');
-            }
-        }
-    }
-
-    static function extra(){
-        if (self::$components == true) {
-            require_once(__DIR__.'/Extras.php');
-            $Extras = new Extras();
-            if(self::isset_session('debug')){
-                echo $Extras->debug(self::get('debug'));
-            }
-        }
     }
 
     static function back(){//a shortcut to go to the prevent page
