@@ -4,7 +4,7 @@ namespace Pickle\Controller;
 class MainController {
 
     public function home(){
-        return ['aaa' => 'a'];
+        return ['data' => 'test'];
     }
 
 }
