@@ -1,6 +1,8 @@
 <?php
 namespace Pickle\Engine;
 
+use Pickle\Engine\ApiEngine;
+
 class Router{
     
     static $routes = ['GET' => [], 'POST' => []];//list of routes
@@ -39,9 +41,6 @@ class Router{
      * @return string
      */
     static function run($url){//check if a route correspond with the url
-
-        $ApiEngine = $GLOBALS['ApiEngine'];
-
         function startsWith ($string, $startString) { 
             $len = strlen($startString); 
             return (substr($string, 0, $len) === $startString); 
@@ -55,14 +54,18 @@ class Router{
                 if($route->match($url) == true){
                     $data = $route->callback();
                     $found = true;
-                    return $ApiEngine->addContentBase($data);
+                    if(isset($data)){
+                        ApiEngine::addContentBase($data);
+                    }
                 }
             }
         }
 
         if(!$found){
-            $ApiEngine->setStatus(404);
+            ApiEngine::setStatus(404);
         }
+
+        return ApiEngine::toJson();
 
     }
 

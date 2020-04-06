@@ -4,68 +4,86 @@ namespace Pickle\Engine;
 
 class ApiEngine {
 
-    private $content = [];
-    private $status = 200;
-    private $abort = true;
+    static $content = [];
+    static $status = 200;
+    static $abort = false;
 
-    public function getContent(){
-        return $this->content;
+    static function getContent(){
+        return self::$content;
     }
 
-    public function setContent(array $content): ApiEngine
+    static function setContent(array $content): void
     {
-        $this->content = $content;
-        return $this;
+        self::$content = $content;
     }
 
-    public function addToContent(string $key, $val): ApiEngine
+    static function addToContent(string $key, $val, $abort = false): void
     {
-        $this->content[$key] = $val;
-        return $this;
+        self::$content[$key] = $val;
+        if($abort){
+            echo self::toJson();
+            die();
+        }
     }
 
-    public function addContentBase(array $arr): ApiEngine
+    static function addContentBase(array $arr): void
     {
-        $this->content = array_merge($this->content, $arr);
-        return $this;
+        self::$content = array_merge(self::$content, $arr);
     }
 
-    public function toJson(): string
+    static function toJson(): string
     {
-        if($this->status != 200){
-            $this->content = [];
-            $this->content['status'] = $this->getStatus();
-            switch($this->status){
-                case 404:
-                    header("HTTP/1.0 404 Not Found");
-                    $this->content['error'] = '404 Not Found';
-                    $this->content['content'] = 'The requested URL was not found on this server.';
-                    return json_encode($this->content, JSON_NUMERIC_CHECK);
+        if(self::$status != 200){
+            // self::$content = [];
+            $error_content = [];
+            $error_content['status'] = self::getStatus();
+            switch(self::$status){
+                case 400:
+                    header("HTTP/1.0 400 Bad Request");
+                    $error_content['status_error'] = 'Bad Request.';
+                    $error_content['error_content'] = 'Bad equest URL or parameters.';
+                    break;
                 case 401:
                     header("HTTP/1.0 401 Unauthorized");
-                    $this->content['error'] = '401 Unauthorized';
-                    $this->content['content'] = 'You cannot access to this page.';
-                    return json_encode($this->content, JSON_NUMERIC_CHECK);
+                    $error_content['status_error'] = '401 Unauthorized';
+                    $error_content['error_content'] = 'You can\'t access this page.';
+                    break;
+                case 404:
+                    header("HTTP/1.0 404 Not Found");
+                    $error_content['status_error'] = 'Not found';
+                    $error_content['error_content'] = 'Ressource not found.';
+                    break;
                 case 429:
-                    $this->content['error'] = 'Request limit reached';
-                    $this->content['content'] = 'You reached your request limit. You must wait before re-use it.';
-                    return json_encode($this->content, JSON_NUMERIC_CHECK);
+                    $error_content['status_error'] = 'Request limit reached';
+                    $error_content['error_content'] = 'You reach the limit of request. Please wait';
+                    break;
+                case 500:
+                    header("HTTP/1.0 500 Internal Server Error");
+                    $error_content['status_error'] = 'Internal server error';
+                    $error_content['error_content'] = 'A problem as occured on the server.';
+                    break;
+                case 503:
+                    header("HTTP/1.0 503 Service Unavailable");
+                    $error_content['status_error'] = 'Service Unavailable';
+                    $error_content['error_content'] = 'The service is unavailable for the time.';
+                    break;
                 default:
-                    $this->content['error'] = 'Unable to provide data';
-                    $this->content['content'] = 'Data cannot be provided for some reason.';
-                    return json_encode($this->content, JSON_NUMERIC_CHECK);
+                    $error_content['status_error'] = 'Unavailable data';
+                    $error_content['error_content'] = 'The data is unavailable.';
+                    break;
             }
+            return json_encode(array_merge($error_content, self::$content), JSON_NUMERIC_CHECK);
         }
-        return json_encode($this->content, JSON_NUMERIC_CHECK);
+        return json_encode(array_merge(['status' => 200], self::$content ?? []), JSON_NUMERIC_CHECK);
     }
 
 
     /**
      * Get the value of status
      */ 
-    public function getStatus(): int
+    static function getStatus(): int
     {
-        return $this->status;
+        return self::$status;
     }
 
     /**
@@ -73,23 +91,40 @@ class ApiEngine {
      *
      * @return  self
      */ 
-    public function setStatus(int $status): ApiEngine
+    static function setStatus(int $status): void
     {
-        $this->status = $status;
-        if($this->abort){
-            echo $this->toJson();
-            header('Content-Type: application/json');// needs improvements
+        self::$status = $status;
+        if(self::$abort){
+            echo self::toJson();
             die();
         }
-        return $this;
+    }
+    
+    /**
+     * error
+     * Adding an error and stopping script execution
+     * @param  string $error
+     * @return void
+     */
+    static function error(string $error){
+        if($error == 'mustBeConnected'){
+            self::setStatus(401);
+            self::setContent([
+                'error' => 'mustBeConnected',
+                'error_message' => 'You must be connected'
+            ]);
+        }
+
+        echo self::toJson();
+        die();
     }
 
     /**
      * Get the value of abort
      */ 
-    public function getAbort(): bool
+    static function getAbort(): bool
     {
-        return $this->abort;
+        return self::$abort;
     }
 
     /**
@@ -97,10 +132,9 @@ class ApiEngine {
      *
      * @return  self
      */ 
-    public function setAbort($abort): ApiEngine
+    static function setAbort($abort): void
     {
-        $this->abort = $abort;
-        return $this;
+        self::$abort = $abort;
     }
 
 }
