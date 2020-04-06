@@ -1,9 +1,9 @@
 <?php
-namespace Pickle;
-//import the model reference
-require_once 'default/Model.php';
+namespace Pickle\Model;
 
-//this is the test Model
+use Pickle\Model;
+
+require_once 'default/Model.php';
 
 class ActionModel extends Model{
 
