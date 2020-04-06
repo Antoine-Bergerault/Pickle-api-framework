@@ -20,7 +20,8 @@
     "autoload": {
         "psr-4": {
             "Pickle\\Engine\\":"./core/App",
-            "Pickle\\Controller\\":"./src/Controllers"
+            "Pickle\\Controller\\":"./src/Controllers",
+            "Pickle\\Model\\":"./src/Models"
         }
     }
 }

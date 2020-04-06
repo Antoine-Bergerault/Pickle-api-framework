@@ -1,5 +1,8 @@
 <?php
-namespace Pickle;
+namespace Pickle\Model;
+
+use Pickle\Model;
+
 require_once 'default/Model.php';
 
 class UserModel extends Model{
